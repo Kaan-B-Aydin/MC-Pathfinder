@@ -27,11 +27,6 @@ public class Pathfinder {
         return neighbors;
     }
 
-    // the real cost of one step (this is g). Your custom costs go here later.
-    private static double stepCost(BlockPos from, BlockPos to) {
-        return 1;
-    }
-
     public static List<BlockPos> aStarLoop(Level level, BlockPos start, BlockPos goal, Heuristic heuristic) {
         PriorityQueue<PathNode> openSet = new PriorityQueue<>();
         HashMap<BlockPos, PathNode> nodes = new HashMap<>();

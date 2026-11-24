@@ -23,10 +23,6 @@ public class Walkability {
         VoxelShape feetShape  = feetState.getCollisionShape(level, pos);
         VoxelShape headShape  = headState.getCollisionShape(level, headPos);
 
-// fluids (feet and head only)
-        //FluidState feetFluid = feetState.getFluidState();
-        //FluidState headFluid = headState.getFluidState();
-
 // lava (keep these for when you allow water later)
         boolean feetLava = feetState.is(Blocks.LAVA);
         boolean headLava = headState.is(Blocks.LAVA);

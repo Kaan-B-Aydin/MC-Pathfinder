@@ -32,7 +32,7 @@ public class PathCommand {
                                                                 var level = source.getLevel();
 
                                                                 List<BlockPos> path = Pathfinder.aStarLoop(
-                                                                        level, player.blockPosition(), goal, new Heuristic.Manhattan());
+                                                                        level, player.blockPosition(), goal, new Heuristic.Octile());
 
                                                                 if (path == null) {
                                                                     source.sendError(Component.literal("No path found"));

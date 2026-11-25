@@ -20,28 +20,46 @@ public class Pathfinder {
 
     private static final int MAX_DROP = 40;
 
+    // the four diagonal offsets (dx, dz)
+    private static final int[][] DIAGONALS = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+
     public static List<BlockPos> getNeighbors(Level level, BlockPos pos) {
         List<BlockPos> neighbors = new ArrayList<>();
 
+        // straight moves: walk, jump up one, or drop down
         for (Direction dir : Direction.Plane.HORIZONTAL) {
-            BlockPos column = pos.relative(dir);                       // the neighbor's column at our height
+            addColumn(level, pos, pos.relative(dir), true, neighbors);
+        }
 
-            for (int dy = 1; dy >= -MAX_DROP; dy--) {
-                BlockPos candidate = column.above(dy);
-
-                if (dy == 1 && !isFree(level, pos.above(2))) continue;           // no headroom to jump
-
-                if (dy < 0 && !columnFree(level, column.above(dy + 2), column.above(1))) {
-                    break;                                                       // blocked on the way down
-                }
-
-                if (canStandAt(level, candidate)) {
-                    neighbors.add(candidate);
-                    if (dy < 0) break;                                           // first landing: can't fall past it
-                }
+        // diagonal moves: walk or drop (no diagonal jumps), and never cut a corner
+        for (int[] d : DIAGONALS) {
+            BlockPos sideA = pos.offset(d[0], 0, 0);
+            BlockPos sideB = pos.offset(0, 0, d[1]);
+            if (!isFree(level, sideA) || !isFree(level, sideA.above())
+                    || !isFree(level, sideB) || !isFree(level, sideB.above())) {
+                continue;                                               // a wall on either side blocks the diagonal
             }
+            addColumn(level, pos, pos.offset(d[0], 0, d[1]), false, neighbors);
         }
         return neighbors;
+    }
+
+    // scan one neighbor column for the first place we can stand (jump up one, same level, or the first landing below)
+    private static void addColumn(Level level, BlockPos pos, BlockPos column, boolean allowJump, List<BlockPos> out) {
+        for (int dy = allowJump ? 1 : 0; dy >= -MAX_DROP; dy--) {
+            BlockPos candidate = column.above(dy);
+
+            if (dy == 1 && !isFree(level, pos.above(2))) continue;           // no headroom to jump
+
+            if (dy < 0 && !columnFree(level, column.above(dy + 2), column.above(1))) {
+                break;                                                       // blocked on the way down
+            }
+
+            if (canStandAt(level, candidate)) {
+                out.add(candidate);
+                if (dy <= 0) break;                                          // first landing: can't fall past it
+            }
+        }
     }
 
     private static boolean isFree(Level level, BlockPos p) {

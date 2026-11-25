@@ -16,7 +16,9 @@ public class Costs {
 
     // ---- the cost of one step ----
     public static double stepCost(Level level, BlockPos from, BlockPos to) {
-        double cost = WALK;                                   // start at the baseline
+        int dx = to.getX() - from.getX();
+        int dz = to.getZ() - from.getZ();
+        double cost = WALK * Math.sqrt(dx * dx + dz * dz);    // 1 for straight, ~1.41 for diagonal
 
         // rule: water at the destination
         if (level.getFluidState(to).is(FluidTags.WATER)) {

@@ -25,4 +25,17 @@ public interface Heuristic {
             return Math.sqrt(dx * dx + dy * dy + dz * dz);
         }
     }
+
+    // straight + diagonal moves on a grid: diagonal part costs sqrt(2), the rest costs 1
+    class Octile implements Heuristic {
+        private static final double SQRT2 = Math.sqrt(2);
+
+        @Override
+        public double estimate(BlockPos from, BlockPos goal) {
+            int dx = Math.abs(from.getX() - goal.getX());
+            int dz = Math.abs(from.getZ() - goal.getZ());
+            int dy = Math.abs(from.getY() - goal.getY());
+            return SQRT2 * Math.min(dx, dz) + Math.abs(dx - dz) + dy;
+        }
+    }
 }

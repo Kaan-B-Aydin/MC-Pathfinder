@@ -1,5 +1,7 @@
 package com.storm.util;
 
+import com.storm.pathfinding.Heuristic;
+import com.storm.pathfinding.Pathfinder;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -17,9 +19,21 @@ public class PathFollower {
     private static List<BlockPos> path = null;
     private static int index = 0;
 
+    private static final int STUCK_TICKS = 40;
+    private static final int MAX_REPLANS = 3;
+
+    private static int ticksSinceProgress = 0;
+    private static int replans = 0;
+    private static BlockPos goal = null;
+
+
+
     public static void setPath(List<BlockPos> newPath) {
         path = newPath;
         index = 1;
+        goal = newPath.get(newPath.size() - 1);   // the last node is the goal
+        ticksSinceProgress = 0;
+        replans = 0;
     }
 
     public static void stop() {
@@ -27,6 +41,22 @@ public class PathFollower {
         index = 0;
         releaseForward();
         releaseSpace();
+    }
+
+    private static void replan(Minecraft mc) {
+        var player = mc.player;
+        if (replans >= MAX_REPLANS) {
+            System.out.println("Stuck: giving up");
+            stop();
+            return;
+        }
+        replans++;
+        List<BlockPos> newPath = Pathfinder.aStarLoop(
+                mc.level, player.blockPosition(), goal, new Heuristic.Manhattan());
+        if (newPath == null) { stop(); return; }
+        path = newPath;
+        index = 1;
+        ticksSinceProgress = 0;
     }
 
     private static void releaseForward() {
@@ -67,8 +97,11 @@ public class PathFollower {
 
             if (dist < 0.4 && Math.abs(player.getY() - target.getY()) < 1.0) {
                 index++;
+                ticksSinceProgress = 0;      // we made progress
                 return;
             }
+
+
 
             // yaw
             RotationHandler.faceToward(player, targetX, targetZ, MAX_TURN_PER_TICK);
@@ -96,6 +129,13 @@ public class PathFollower {
                     && dist < 1.2;
             mc.options.keyJump.setDown(needJump);
             holdingSpace = needJump;
+            ticksSinceProgress++;
+            if (ticksSinceProgress > STUCK_TICKS) {
+                System.out.println("Replanning (" + (replans + 1) + ")");
+                replan(mc);
+                return;
+            }
+
         });
     }
 }

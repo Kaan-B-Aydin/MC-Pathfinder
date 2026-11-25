@@ -1,6 +1,7 @@
 package com.storm.commands;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.storm.movement.PathFollower;
 import com.storm.pathfinding.Heuristic;
 import com.storm.pathfinding.Pathfinder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -38,6 +39,7 @@ public class PathCommand {
                                                                     return 0;
                                                                 }
                                                                 source.sendFeedback(Component.literal("Path found: " + path.size() + " blocks"));
+                                                                PathFollower.setPath(path);
                                                                 return 1;
                                                             })
                                                     )

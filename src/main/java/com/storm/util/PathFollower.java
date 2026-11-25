@@ -34,6 +34,11 @@ public class PathFollower {
     private static int ticksSinceProgress = 0;
     private static int replans = 0;
     private static BlockPos goal = null;
+    private static BlockPos lastAim = null;              // last point we steered toward (for the debug overlay)
+
+    public static List<BlockPos> getPath() { return path; }
+    public static int getIndex() { return index; }
+    public static BlockPos getAim() { return lastAim; }
 
     public static void setPath(List<BlockPos> newPath) {
         path = newPath;
@@ -49,6 +54,7 @@ public class PathFollower {
         releaseForward();
         releaseSpace();
         RotationHandler.clearTarget();
+        lastAim = null;
     }
 
     private static void replan(Minecraft mc) {
@@ -186,6 +192,7 @@ public class PathFollower {
 
             BlockPos target = path.get(index);              // the next node we must actually reach
             BlockPos aim = pickAimNode(mc.level, player);  // where we steer toward
+            lastAim = aim;
             double aimX = aim.getX() + 0.5;
             double aimZ = aim.getZ() + 0.5;
             double dist = horizDist(player, target);

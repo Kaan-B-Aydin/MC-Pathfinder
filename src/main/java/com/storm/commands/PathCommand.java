@@ -1,6 +1,7 @@
 package com.storm.commands;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.storm.util.PathDebug;
 import com.storm.util.PathFollower;
 import com.storm.pathfinding.Heuristic;
 import com.storm.pathfinding.Pathfinder;
@@ -45,6 +46,15 @@ public class PathCommand {
                                                     )
                                             )
                                     )
+                            )
+
+                            .then(ClientCommands.literal("debug")
+                                    .executes(context -> {
+                                        PathDebug.enabled = !PathDebug.enabled;
+                                        context.getSource().sendFeedback(Component.literal(
+                                                "Path debug " + (PathDebug.enabled ? "on" : "off")));
+                                        return 1;
+                                    })
                             )
 
                             .then(ClientCommands.literal("stop")

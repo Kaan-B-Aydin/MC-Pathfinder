@@ -1,10 +1,9 @@
 package com.storm;
 
 import com.storm.commands.PathCommand;
-import com.storm.movement.PathFollower;
+import com.storm.util.PathFollower;
 import com.storm.util.RotationHandler;
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.world.level.block.Rotation;
 
 public class StormClient implements ClientModInitializer {
     @Override

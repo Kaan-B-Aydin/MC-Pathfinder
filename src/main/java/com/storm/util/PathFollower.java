@@ -1,6 +1,5 @@
-package com.storm.movement;
+package com.storm.util;
 
-import com.storm.util.RotationHandler;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -13,6 +12,7 @@ public class PathFollower {
     private static final float WALK_IF_FACING_WITHIN = 30f;   // new: degrees
     private static final int LOOK_AHEAD = 2;
     private static boolean holdingForward = false;
+    private static boolean holdingSpace = false;
 
     private static List<BlockPos> path = null;
     private static int index = 0;
@@ -25,7 +25,8 @@ public class PathFollower {
     public static void stop() {
         path = null;
         index = 0;
-        releaseForward();                                      // new
+        releaseForward();
+        releaseSpace();
     }
 
     private static void releaseForward() {
@@ -34,12 +35,19 @@ public class PathFollower {
             holdingForward = false;
         }
     }
+    private static void releaseSpace(){
+        if(holdingSpace){
+            Minecraft.getInstance().options.keyJump.setDown(false);
+            holdingSpace = false;
+        }
+    }
 
     public static void register() {
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             var player = mc.player;
             if (player == null || path == null) {
                 releaseForward();
+                releaseSpace();
                 return;
             }
 
@@ -57,7 +65,7 @@ public class PathFollower {
             double dz = targetZ - player.getZ();
             double dist = Math.sqrt(dx * dx + dz * dz);
 
-            if (dist < 0.4) {
+            if (dist < 0.4 && Math.abs(player.getY() - target.getY()) < 1.0) {
                 index++;
                 return;
             }
@@ -81,6 +89,13 @@ public class PathFollower {
             boolean walk = off < WALK_IF_FACING_WITHIN;
             mc.options.keyUp.setDown(walk);
             holdingForward = walk;
+            // jump: the next node is higher than our feet, we're on the ground, and close enough to the ledge
+            boolean needJump = walk
+                    && target.getY() > player.getY() + 0.1
+                    && player.onGround()
+                    && dist < 1.2;
+            mc.options.keyJump.setDown(needJump);
+            holdingSpace = needJump;
         });
     }
 }

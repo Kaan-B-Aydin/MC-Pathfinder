@@ -1,7 +1,7 @@
 package com.storm.commands;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.storm.movement.PathFollower;
+import com.storm.util.PathFollower;
 import com.storm.pathfinding.Heuristic;
 import com.storm.pathfinding.Pathfinder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -46,6 +46,15 @@ public class PathCommand {
                                             )
                                     )
                             )
+
+                            .then(ClientCommands.literal("stop")
+                                    .executes(context -> {
+                                        PathFollower.stop();
+                                        context.getSource().sendFeedback(Component.literal("Stopped"));
+                                        return 1;
+                                    })
+                            )
+
             );
         });
     }

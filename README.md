@@ -1,4 +1,4 @@
-# StormClient
+# Pathfinder
 
 ## Setup
 

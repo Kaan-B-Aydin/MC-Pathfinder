@@ -24,6 +24,7 @@ public class PathFollower {
 
     private static boolean holdingForward = false;
     private static boolean holdingSpace = false;
+    private static boolean holdingSprint = false;
 
     private static List<BlockPos> path = null;
     private static int index = 0;
@@ -53,6 +54,7 @@ public class PathFollower {
         index = 0;
         releaseForward();
         releaseSpace();
+        releaseSprint();
         RotationHandler.clearTarget();
         lastAim = null;
     }
@@ -77,6 +79,12 @@ public class PathFollower {
         if (holdingForward) {
             Minecraft.getInstance().options.keyUp.setDown(false);
             holdingForward = false;
+        }
+    }
+    private static void releaseSprint(){
+        if(holdingSprint){
+            Minecraft.getInstance().options.keySprint.setDown(false);
+            holdingSprint = false;
         }
     }
 
@@ -223,6 +231,15 @@ public class PathFollower {
                     && dist < 1.2;
             mc.options.keyJump.setDown(needJump);
             holdingSpace = needJump;
+
+            //Determine if spring is required
+            boolean sprint = (horizDist(player,aim) >= 3);
+
+            mc.options.keySprint.setDown(sprint);
+            holdingSprint = sprint;
+            if (!sprint){
+                player.setSprinting(false);
+            }
 
             ticksSinceProgress++;
             if (ticksSinceProgress > STUCK_TICKS) {

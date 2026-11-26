@@ -15,6 +15,8 @@ import java.util.List;
 
 public class PathFollower {
 
+    public static boolean enabled = true;
+
     private static final float WALK_IF_FACING_WITHIN = 50f;   // degrees
     private static final int MAX_SKIP = 8;                   // how many nodes ahead we may aim straight at
     private static final double NODE_REACHED = 0.6;           // horizontal distance that counts as "at" a node
@@ -233,7 +235,7 @@ public class PathFollower {
             holdingSpace = needJump;
 
             //Determine if spring is required
-            boolean sprint = (horizDist(player,aim) >= 3);
+            boolean sprint = walk && !needJump && off < 15 && horizDist(player, aim) >= 3;
 
             mc.options.keySprint.setDown(sprint);
             holdingSprint = sprint;
